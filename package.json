@@ -1,0 +1,19 @@
+{
+	"name": "fastlist",
+	"version": "0.0.1",
+	"description": "todo list server",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"s": "nodemon main.js"
+	},
+	"author": "Joël Vermeulen",
+	"license": "ISC",
+	"devDependencies": {
+		"jshint": "^2.13.4",
+		"nodemon": "^2.0.15",
+		"prettier": "^2.6.2"
+	},
+	"dependencies": {
+	}
+}
