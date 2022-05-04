@@ -183,6 +183,12 @@ As you saw above, the `render` function automatically escapes characters. This c
 app.objEscapeHTML(data)
 ```
 
+you can also escape a single string using
+
+```js
+app.escapeHTML(string)
+```
+
 ### Data flattening
 
 Query data and POST body data is automatically flattened. If the data contains arrays, it is recursive replaced with its first element. Setting `flattenData` to `false` in the ServerOptions will disable this behavior. You can flatten data yourself by using
