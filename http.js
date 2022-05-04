@@ -227,6 +227,7 @@ export class Response {
 	 * You can always escape data by using `objEscapeHTML(data)`
 	 * @param {String} path relative path to file
 	 * @param {Object | Boolean} data data to replace `{{}}` with - if set to `true` will render static file (`/public/static/`)
+	 * @param {Number} code response status code
 	 */
 	async render(path, data = null, code = 200) {
 		let r = await render(path, data)
@@ -326,6 +327,8 @@ async function handleReq(req, res) {
 	reqIPs[req.socket.remoteAddress].tick()
 	if (reqIPs[req.socket.remoteAddress].isInvalid()) {
 		console.log(`access denied to ${req.socket.remoteAddress} for spamming`)
+		res.writeHead(429)
+		res.end()
 		return
 	}
 	let request = new Request(req)
