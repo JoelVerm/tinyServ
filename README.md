@@ -185,7 +185,17 @@ app.objEscapeHTML(data)
 
 ### Data flattening
 
-Query data and POST body data is automatically flattened. If the data contains arrays, it is recursive replaced with its first element. Setting `flattenData` to `false` in the ServerOptions will disable this behavior.
+Query data and POST body data is automatically flattened. If the data contains arrays, it is recursive replaced with its first element. Setting `flattenData` to `false` in the ServerOptions will disable this behavior. You can flatten data yourself by using
+
+```js
+app.flatten(data)
+```
+
+and flatten arrays using
+
+```js
+app.arrToFlat(array)
+```
 
 ### DDOS protection
 

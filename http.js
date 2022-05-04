@@ -27,9 +27,14 @@ export const objEscapeHTML = obj =>
 		return obj
 	}, {})
 
-const arrToFlat = a => (Array.isArray(a) ? arrToFlat(a[0]) : a)
 /**
- * flatten arrays in an object - returns the first non-array value
+ * Flatten an array and return the first non-array element
+ * @param {Array} a
+ * @returns {any}
+ */
+export const arrToFlat = a => (Array.isArray(a) ? arrToFlat(a[0]) : a)
+/**
+ * flatten arrays in an object - returns the first non-array element for each value in the object
  * @param {Object<Array>} obj object with arrays to flatten as values
  * @returns {Object<Array>} object with flattened arrays as values
  */
