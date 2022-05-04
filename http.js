@@ -326,13 +326,14 @@ class RequestCounter extends Array {
 	}
 }
 const reqIPs = {}
+/** @param {http.IncomingMessage} req @param {http.ServerResponse} res */
 async function handleReq(req, res) {
 	if (!reqIPs[req.socket.remoteAddress])
 		reqIPs[req.socket.remoteAddress] = new RequestCounter()
 	reqIPs[req.socket.remoteAddress].tick()
 	if (reqIPs[req.socket.remoteAddress].isInvalid()) {
 		console.log(`access denied to ${req.socket.remoteAddress} for spamming`)
-		res.writeHead(429)
+		res.writeHead(429, {'Retry-After': serverOptions.DDOStimeoutMinutes / 60})
 		res.end()
 		return
 	}
