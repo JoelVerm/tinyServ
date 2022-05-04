@@ -33,6 +33,7 @@ app.onGet('/', async (req, res) => {
 	res.render('index.html', {name: 'LiveOverflow'})
 })
 ```
+
 `app.onGet` registers the handler for the GET request to this route. The handler needs to be an async function to be able to await data.
 
 `res.render` renders the page and closes the connection.
@@ -45,6 +46,7 @@ app.onPost('/submit', async (req, res) => {
 	res.render('index.html', {name: data.name})
 })
 ```
+
 `app.onPost` registers a POST route.
 
 You can get the POST data with `req.getPostData`. That is an async function so you have to await it.
@@ -54,6 +56,7 @@ You can get the POST data with `req.getPostData`. That is an async function so y
 ```js
 let server = await app.start()
 ```
+
 `app.start` starts the server and returns the http server instance.
 
 You can pass it the port number you want (default `80`):
@@ -62,7 +65,7 @@ You can pass it the port number you want (default `80`):
 let server = await app.start(3000)
 ```
 
-#### ServerOptions
+#### *ServerOptions*
 
 You can start the server with options, like this:
 
@@ -75,6 +78,7 @@ let server = await app.start(3000, {
 	DDOStimeoutMinutes: 5
 })
 ```
+
 These are the defaults for the options.
 
 `whitelistPaths` is explained in its own section after *Security measures*.
@@ -90,7 +94,7 @@ In this part we will look at some other examples. The following code snippets ca
 let server = await app.start()
 ```
 
-### Cookies
+### **Cookies**
 
 You can read cookies using `req.getCookie`.
 
@@ -100,6 +104,7 @@ app.onGet('/fromCookie', async (req, res) => {
 	res.render('index.html', {name: nameCookie})
 })
 ```
+
 You can also set cookies using `res.setCookie`.
 
 ```js
@@ -110,7 +115,7 @@ app.onPost('/submitCookie', async (req, res) => {
 })
 ```
 
-### Redirect
+### **Redirect**
 
 Redirecting is simply done with `res.redirect`.
 
@@ -120,7 +125,7 @@ app.onGet('/invalid', async (req, res) => {
 })
 ```
 
-### Advanced rendering
+### **Advanced rendering**
 
 You have already seen an example of how to render a simple page. The code looks like this:
 
@@ -129,6 +134,7 @@ app.onGet('/', async (req, res) => {
 	res.render('index.html', {name: 'LiveOverflow'})
 })
 ```
+
 The file `index.html` looks like this:
 
 ```html
@@ -147,14 +153,16 @@ The file `index.html` looks like this:
     </body>
 </html>
 ```
+
 As you can see, the key between the curly brackets ( here `{{name}}` ) will be replaced with the matching value of the object passed to `render`.
 
 You can do more with the `render` function.
-By default, the `render` function will render files from `/public/`. If you call it like this
+By default, the `render` function will render files from `/public/`. But if you call it like this
 
 ```js
 res.render('about.html', true)
 ```
+
 it will render a file from the `/public/static/` directory.
 
 You can also pass it a different status code:
@@ -163,7 +171,7 @@ You can also pass it a different status code:
 res.render('index.html', {name: 'LiveOverflow'}, 204)
 ```
 
-#### Escaping
+#### *Escaping*
 
 By default, the `render` function will escape all non-alphanumerical characters in the input. To prevent that, call it like this:
 
@@ -175,7 +183,7 @@ res.render('index.html', {name: '<b>LiveOverflow</b>', noEscape: true})
 
 *Settings* mean **ServerOptions** passed when starting the server.
 
-### HTML escaping
+### **HTML escaping**
 
 As you saw above, the `render` function automatically escapes characters. This can be disabled by setting `escapeRender` to `false`. You can still escape the data with
 
@@ -189,7 +197,7 @@ you can also escape a single string using
 app.escapeHTML(string)
 ```
 
-### Data flattening
+### **Data flattening**
 
 Query data and POST body data is automatically flattened. If the data contains arrays, it is recursive replaced with its first element. Setting `flattenData` to `false` in the ServerOptions will disable this behavior. You can flatten data yourself by using
 
@@ -203,10 +211,30 @@ and flatten arrays using
 app.arrToFlat(array)
 ```
 
-### DDOS protection
+### **DDOS protection**
 
 This server contains automatic DDOS protection. If a user makes more requests per second than allowed, they are banned for a certain amount of time. The number of requests is customizable through the option `maxRequestsPerSecond`, the ban time in minutes is set with `DDOStimeoutMinutes`.
 
-## WhitelistPaths
+## Other features
+
+### **WhitelistPaths**
 
 WhitelistPaths is a feature that speeds up 404 request handling. It works by caching all files in the `/public/` directory when the server starts. When the server is running it only checks if a page renderer is already available, and does not try to generate a new one, slowing the server down with file system operations. This might be useful to reduce the impact of the first load of a page after a server start. A downside is the increased startup time as the server traverses all directories in the `/public/` directory and generates renderers on startup.
+
+### **Automatic static rendering**
+
+When requested a url like `/about` , the server first looks for a handler for `'/about'` set by the user. If the handler is not found, it looks for a handler for `'default'`.
+
+If that also is not present, the server tries to render the file itself. It looks in the `/public/static/` directory to find a file with the same name. The server changes `/` into `/index.html` and appends `.html` to paths with no extension.
+
+If the file doesn't exist, it tries to call the handler for `'err404'`. If the handler is not found, it tries to render `/public/static/404.html` . If that file doesn't exist, it simply returns a 404 error code and closes the connection.
+
+In short, the algorithm looks like this:
+ - Call handler for `${path}`
+ - Call handler for `'default'`
+ - If `${path}` is `/` : `${path}` = `/index.html`
+ - If `${path}` does not include a `'.'` : `${path}` += `.html`
+ - Render `/public/static/${path}`
+ - Call handler for `'err404'`
+ - Render `/public/static/404.html`
+ - Return 404 error code and close the connection
