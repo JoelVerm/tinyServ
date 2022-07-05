@@ -1,14 +1,14 @@
 {
-	"name": "fastlist",
+	"name": "tinyserv",
 	"version": "0.0.1",
-	"description": "todo list server",
+	"description": "tiny fast server",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
 		"s": "nodemon main.js"
 	},
-	"author": "Joël Vermeulen",
-	"license": "ISC",
+	"author": "JoelVerm",
+	"license": "",
 	"devDependencies": {
 		"jshint": "^2.13.4",
 		"nodemon": "^2.0.15",
