@@ -4,6 +4,7 @@ import { Buffer } from 'buffer'
 import { promises } from 'fs'
 import qs from 'querystring'
 import { URL } from 'url'
+import { isText } from 'istextorbinary'
 
 import * as pathModule from 'path'
 import { fileURLToPath } from 'url'
@@ -47,7 +48,12 @@ export const flatten = obj =>
 
 let renderFns = {}
 async function genRenderFn(filePath) {
-	let text = await promises.readFile(filePath, 'utf8')
+	let buffer = await promises.readFile(filePath)
+	if (!isText(filePath, buffer)) {
+		renderFns[filePath] = () => buffer
+		return
+	}
+	let text = buffer.toString('utf8')
 	let matches = []
 	text = text
 		.replace(/\\/g, '\\\\')
@@ -144,7 +150,9 @@ export class Request {
 		this.url = new URL(req.url, `http://${req.headers.host}`)
 		this.path = this.url.pathname
 		this.query = this.url.search
-		this.params = flatten(this.url.searchParams)
+		this.params = flatten(
+			Object.fromEntries(this.url.searchParams.entries())
+		)
 	}
 	/** @returns {Promise<qs.ParsedUrlQuery>} post data */
 	async getPostData() {
@@ -178,7 +186,6 @@ export class Response {
 	/** @param {http.ServerResponse} res */
 	constructor(res) {
 		this.res = res
-
 	}
 	/**
 	 * @param {String} name valid cookie name
@@ -244,6 +251,10 @@ export class Response {
 		} else {
 			throw `Requested file: ${path} not found`
 		}
+	}
+	async return(string, contentType = 'text/plain', code = 200) {
+		this.res.writeHead(code, { 'Content-Type': contentType + '; charset=utf-8' })
+		this.res.end(string)
 	}
 }
 
